@@ -1,46 +1,41 @@
+/*
+    สมาชิกกลุ่ม
+    1. นางสาวฑิฆัมพร    สิมอุด  5910401033
+    2. นางสาววิภาวดี    ม่อนคุต 5910406451
+
+ */
+
 import java.io.*;
-import java.net.*;
+import java.net.Socket;
 
 public class TCP_Client {
-    public static void main(String argv[]) throws Exception {
-        Socket clientSocket = new Socket("localhost",12000);
-        DataInputStream inFromServer = new DataInputStream(clientSocket.getInputStream());
-        DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
+    public static void main(String[] args) throws Exception
+    {
+        Socket connectS = new Socket("localhost",9999);
+        System.out.println("Send something to server.");
+        DataOutputStream dOut = new DataOutputStream(connectS.getOutputStream());
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        DataInputStream dIn  =new DataInputStream(connectS.getInputStream());
+        try {
+            while (true) {
+                String sendMessage = br.readLine();
+                dOut.writeUTF(sendMessage);
 
-        System.out.println("Connect to Top Up Easy : ready");
-        BufferedReader inFormUser = new BufferedReader(new InputStreamReader(System.in));
-
-        while (true){
-            String messageIn = inFromServer.readUTF();
-            System.out.println("client : " + messageIn);
-            if (messageIn.equalsIgnoreCase("hello")){
-                String messageOut =  "hello";
-                outToServer.writeUTF(messageOut);
-
+                //read from server
+                String message = dIn.readUTF();
+                if (!message.equals("")) System.out.println("S: " + message);
+                if (message.matches("101 DISCONNECTED" + " > " + connectS.getLocalAddress().toString() + " is logout")) {
+                    break;
+                }
             }
-            else if (messageIn.equalsIgnoreCase("exit")) break;
-
         }
-        clientSocket.close();
-
-        /*while (!msgout.equalsIgnoreCase("exit")){
-            msgout = inFormUser.readLine();
-            outToServer.writeUTF(msgout);
-            msgin = inFromServer.readUTF();
-            System.out.println("Server : " + msgin); //printing server message
-        }*/
-
-        /*while (true){
-            String sentence = inFormUser.readLine();
-            outToServer.writeBytes(sentence + '\n');
-            if (sentence.equalsIgnoreCase("exit")) {
-                System.out.println("Connection end by client");
-                break;
-            }
-
-            clientSocket.close();
-        }*/
-
+        catch (EOFException e) {
+            e.printStackTrace();
+        }
+        finally {
+            connectS.close();
+        }
 
     }
+
 }
